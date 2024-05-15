@@ -1,0 +1,11 @@
+<tv-card>
+    <div class="card border-info">
+        <img if={props.posterUrl} class="card-img-top" src={props.posterUrl} alt="Card image cap">
+        <div class="card-body">
+            <h5 class="card-title text-center"><a href="#/tv/{props.id}">{props.title}</a></h5>
+            <p class="card-text text-center">{props.firstAirDate}</p>
+            <ratings voteAverage="{props.voteAverage}"></ratings>
+            <span each={genre in props.genres} class="badge rounded-pill text-bg-secondary me-1">{genre}</span>
+        </div>
+    </div>
+</tv-card>

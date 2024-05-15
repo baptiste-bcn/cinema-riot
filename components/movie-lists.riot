@@ -1,0 +1,170 @@
+<movie-lists>
+    <div class="container">
+        <h1>{state.title}</h1>
+        <select onchange={onSelectChange} class="form-select" aria-label="Default select example">
+            <option each={list in state.lists} value="{list.name}">{ list.title }</option>
+        </select>
+        <br>
+        <div>
+            <ul class="pagination pagination-sm">
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick={previousPage}>
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item { state.currentPage === 1 ? 'active' : null }">
+                    <a class="page-link" href="#" onclick={changePage}>1</a>
+                </li>
+                <li each={neighbour in state.currentPageNeighbours}
+                    class="page-item { state.currentPage === neighbour ? 'active' : null }">
+                    <a class="page-link" href="#" onclick={changePage}>{neighbour}</a>
+                </li>
+                <li class="page-item { state.currentPage === state.totalPages ? 'active' : null }">
+                    <a class="page-link" href="#" onclick={changePage}>{state.totalPages}</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick={nextPage}>
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-5" each={ element in state.currentList}>
+                <movie-card title={element.title}
+                            releaseDate={element.locale_release_date}
+                            posterUrl={element.poster_url}
+                            genres={element.genres}
+                            id={element.id}
+                            voteAverage={element.vote_average}
+                ></movie-card>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        export default {
+            updateCurrentPageNeighbours(newPage) {
+                let neighbours;
+
+                if (newPage <= 3) {
+                    neighbours = [2, 3, 4];
+                } else if (newPage > 3 && newPage < this.state.totalPages - 2) {
+                    neighbours = [newPage - 1, newPage, newPage + 1];
+                } else {
+                    neighbours = [this.state.totalPages - 3, this.state.totalPages - 2, this.state.totalPages - 1];
+                }
+
+                this.update({
+                    currentPageNeighbours: neighbours
+                });
+            },
+            previousPage(e) {
+                e.preventDefault();
+                if (this.state.currentPage === 1) {
+                    return;
+                }
+                const page = this.state.currentPage - 1;
+                this.update({
+                    currentPage: page,
+                })
+
+                this.updateCurrentPageNeighbours(page);
+                this.updateMovieList(this.state.currentListName, this.state.currentPage);
+            },
+            nextPage(e) {
+                e.preventDefault();
+                if (this.state.currentPage === this.state.totalPages) {
+                    return;
+                }
+                const page = this.state.currentPage + 1;
+                this.update({
+                    currentPage: page,
+                })
+
+                this.updateCurrentPageNeighbours(page);
+                this.updateMovieList(this.state.currentListName, this.state.currentPage);
+            },
+            changePage(e) {
+                e.preventDefault();
+                const page = parseInt(e.target.textContent);
+                this.update({
+                    currentPage: page
+                })
+
+                this.updateCurrentPageNeighbours(page);
+                this.updateMovieList(this.state.currentListName, this.state.currentPage);
+            },
+            updateMovieList(list, page) {
+                getMovieList(list, page
+                ).then(list => {
+                    list.results.forEach(element => {
+                        element.genres = [];
+                        element.genre_ids.forEach(genreId => {
+                            const genre = this.state.movieGenres.find(genre => genre.id === genreId);
+                            if (genre) {
+                                element.genres.push(genre.name);
+                            }
+                        });
+                    });
+                    this.update({
+                        currentList: list.results,
+                        totalPages: list.total_pages,
+                    });
+                }).catch(err => console.error(err));
+            },
+            onBeforeMount() {
+                let lists = [];
+                let title = null;
+
+                title = "Films"
+                lists = [{
+                    name: "now_playing",
+                    title: "Films en salle actuellement"
+                }, {
+                    name: "popular",
+                    title: "Films populaires"
+                }, {
+                    name: "top_rated",
+                    title: "Films les mieux notés"
+                }, {
+                    name: "upcoming",
+                    title: "Films à venir"
+                }]
+
+                this.state = {
+                    lists: lists,
+                    title: title,
+                    currentList: [],
+                    movieGenres: [],
+                    totalPages: 0,
+                    currentPage: 1,
+                    currentListName: lists[0].name,
+                    currentPageNeighbours: [2, 3, 4]
+                }
+
+                getGenres("movie").then(movieGenres => {
+                    this.update({
+                        movieGenres: movieGenres
+                    });
+                }).catch(err => {
+                    console.error(err);
+                });
+                this.updateMovieList(lists[0].name, 1);
+            },
+            onSelectChange(e) {
+                this.update({
+                    totalPages: 0,
+                    currentPage: 1,
+                    currentListName: e.target.value,
+                    currentPageNeighbours: [2, 3, 4]
+                })
+                this.updateMovieList(e.target.value, this.state.currentPage);
+            }
+        }
+
+    </script>
+
+</movie-lists>

@@ -1,0 +1,51 @@
+<home-page>
+    <div class="container">
+        <h1 class="text-center">Tendances de la semaine</h1>
+        <div class="row">
+            <div class="col-md-3 mb-5" each={ trendingMovie in state.trendingMovies}>
+                <movie-card title={trendingMovie.title}
+                            releaseDate={trendingMovie.locale_release_date}
+                            posterUrl={trendingMovie.poster_url}
+                            genres={trendingMovie.genres}
+                            id={trendingMovie.id}
+                            voteAverage={trendingMovie.vote_average}
+                ></movie-card>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        export default {
+            onBeforeMount() {
+                this.state = {
+                    movieGenres: [],
+                    trendingMovies: []
+                };
+                getGenres("movie").then(movieGenres => {
+                    this.update({
+                        movieGenres: movieGenres
+                    });
+                }).catch(err => {
+                    console.error(err);
+                });
+                getTrendingMovies().then(trendingMovies => {
+                    trendingMovies.forEach(trendingMovie => {
+                        trendingMovie.genres = [];
+                        trendingMovie.genre_ids.forEach(genreId => {
+                            const genre = this.state.movieGenres.find(genre => genre.id === genreId);
+                            if (genre) {
+                                trendingMovie.genres.push(genre.name);
+                            }
+
+                        });
+                    });
+                    this.update({
+                        trendingMovies: trendingMovies
+                    });
+                }).catch(err => {
+                    console.error(err);
+                })
+            }
+        }
+    </script>
+</home-page>

@@ -1,0 +1,36 @@
+<person-details>
+    <div class="container">
+        <div class="row">
+            <div class="col-4 bg-light">
+                <div if={state.personDetails.profile_path} class="text-center">
+                    <img src={state.personDetails.profile_path_url} class="img-thumbnail" width="75%">
+                </div>
+                <br>
+                <p><span><b>Date de naissance</b><br>{state.personDetails.birthday}</span></p>
+                <p><span><b>Lieu de naissance</b><br>{state.personDetails.place_of_birth}</span></p>
+            </div>
+            <div class="col-8">
+                <h1 class="text-center">{state.personDetails.name}</h1>
+                <h5 class="text-center">Biographie</h5>
+                <p style="text-align: justify"> {state.personDetails.biography} </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        export default {
+            onBeforeMount() {
+                this.state = {
+                    personDetails: {}
+                };
+                getPeopleDetails(this.props.personId).then(personDetails => {
+                    this.update({
+                        personDetails: personDetails
+                    });
+                }).catch(err => {
+                    console.error(err);
+                });
+            }
+        }
+    </script>
+</person-details>

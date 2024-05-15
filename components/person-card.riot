@@ -1,0 +1,11 @@
+<person-card>
+    <div class="card border-secondary">
+        <img if={props.profileUrl} class="card-img-top" src={props.profileUrl} alt="Card image cap">
+        <div class="card-body">
+            <h5 class="card-title text-center">
+                <a href="#/person/{props.id}">{props.title}</a>
+            </h5>
+            <span if={props.knownFor} class="badge rounded-pill text-bg-secondary me-1">{props.knownFor}</span>
+        </div>
+    </div>
+</person-card>

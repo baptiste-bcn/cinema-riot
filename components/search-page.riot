@@ -1,0 +1,198 @@
+<search-page>
+    <div class="container">
+        <div class="search-bar py-5">
+
+            <h2 class="text-center mb-4">Films, séries, acteurs...</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="input-group mb-3">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+                        <button class="btn btn-primary" type="button" id="button-addon2" onclick={handleSearch}>
+                            Chercher
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div if={state.searchResults.length > 0}>
+            <ul class="pagination pagination-sm">
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick={previousPage}>
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item { state.currentPage === 1 ? 'active' : null }">
+                    <a class="page-link" href="#" onclick={changePage}>1</a>
+                </li>
+                <li each={neighbour in state.currentPageNeighbours}
+                    class="page-item { state.currentPage === neighbour ? 'active' : null }">
+                    <a class="page-link" href="#" onclick={changePage}>{neighbour}</a>
+                </li>
+                <li class="page-item { state.currentPage === state.totalPages ? 'active' : null }">
+                    <a class="page-link" href="#" onclick={changePage}>{state.totalPages}</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick={nextPage}>
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-5" each={ element in state.searchResults}>
+                <movie-card if={element.media_type==="movie"}
+                            title={element.title}
+                            releaseDate={element.locale_release_date}
+                            posterUrl={element.poster_url}
+                            genres={getMovieGenres(element.genre_ids)}
+                            id={element.id}
+                            voteAverage={element.vote_average}
+                ></movie-card>
+
+                <tv-card if={element.media_type==="tv"}
+                         title={element.name}
+                         releaseDate={element.locale_release_date}
+                         posterUrl={element.poster_url}
+                         genres={getTvGenres(element.genre_ids)}
+                         id={element.id}
+                         voteAverage={element.vote_average}
+                ></tv-card>
+                <person-card if={element.media_type==="person"}
+                             id={element.id}
+                             title={element.name}
+                             profileUrl={element.profile_url}
+                             knownFor={element.known_for_department}
+                ></person-card>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        export default {
+            updateCurrentPageNeighbours(newPage) {
+                let neighbours;
+
+                if (newPage <= 3) {
+                    neighbours = [2, 3, 4];
+                } else if (newPage > 3 && newPage < this.state.totalPages - 2) {
+                    neighbours = [newPage - 1, newPage, newPage + 1];
+                } else {
+                    neighbours = [this.state.totalPages - 3, this.state.totalPages - 2, this.state.totalPages - 1];
+                }
+
+                this.update({
+                    currentPageNeighbours: neighbours
+                });
+            },
+            previousPage(e) {
+                e.preventDefault();
+                if (this.state.currentPage === 1) {
+                    return;
+                }
+                const page = this.state.currentPage - 1;
+                this.update({
+                    currentPage: page,
+                })
+
+                this.updateCurrentPageNeighbours(page);
+                this.search(this.state.query, this.state.currentPage);
+            },
+            nextPage(e) {
+                e.preventDefault();
+                if (this.state.currentPage === this.state.totalPages) {
+                    return;
+                }
+                const page = this.state.currentPage + 1;
+                this.update({
+                    currentPage: page,
+                })
+
+                this.updateCurrentPageNeighbours(page);
+                this.search(this.state.query, this.state.currentPage);
+            },
+            changePage(e) {
+                e.preventDefault();
+                const page = parseInt(e.target.textContent);
+                this.update({
+                    currentPage: page
+                })
+
+                this.updateCurrentPageNeighbours(page);
+                this.search(this.state.query, this.state.currentPage);
+            },
+            onBeforeMount() {
+                this.state = {
+                    query: "",
+                    searchResults: [],
+                    movieGenres: [],
+                    tvGenres: [],
+                    totalPages: 0,
+                    currentPage: 1,
+                    currentPageNeighbours: [2, 3, 4]
+                }
+                getGenres("movie").then(movieGenres => {
+                    this.update({
+                        movieGenres: movieGenres
+                    });
+                }).catch(err => console.error(err));
+                getGenres("tv").then(tvGenres => {
+                    this.update({
+                        tvGenres: tvGenres
+                    });
+                }).catch(err => console.error(err));
+            },
+            search(query, page) {
+                searchMulti(query, page).then(searchResults => {
+                    this.update({
+                        searchResults: searchResults.results,
+                        totalPages: searchResults.total_pages,
+                    });
+                    console.log(this.state.totalPages)
+                }).catch(err => console.error(err));
+            },
+            handleSearch() {
+                this.update({
+                    totalPages: 0,
+                    currentPage: 1,
+                    currentPageNeighbours: [2, 3, 4]
+                });
+
+                const query = document.getElementById('searchInput').value;
+                if (!query) {
+                    this.update({
+                        searchResults: []
+                    });
+                    return;
+                }
+                this.update({
+                    query: query
+                })
+                this.search(query, 1);
+            },
+            getMovieGenres(ids) {
+                const movieGenres = [];
+                ids.forEach(id => {
+                    const genre = this.state.movieGenres.find(genre => genre.id === id);
+                    if (genre) {
+                        movieGenres.push(genre.name);
+                    }
+                });
+                return movieGenres;
+            },
+            getTvGenres(ids) {
+                const movieGenres = [];
+                ids.forEach(id => {
+                    const genre = this.state.tvGenres.find(genre => genre.id === id);
+                    if (genre) {
+                        movieGenres.push(genre.name);
+                    }
+                });
+                return movieGenres;
+            }
+        }
+    </script>
+</search-page>

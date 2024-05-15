@@ -1,0 +1,86 @@
+<movie-details>
+    <div if={state.movieDetails.backdrop_url} style="height:250px">
+        <img src={state.movieDetails.backdrop_url} class="img-fluid">
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-4 bg-light">
+                <img if={state.movieDetails.poster_url} src={state.movieDetails.poster_url} class="img-fluid">
+                <br>
+                <br>
+                <trailer type="movie" id={props.movieId}></trailer>
+            </div>
+            <div class="col-8" style="background-color: white !important;">
+                <h1 class="text-center">{state.movieDetails.title}</h1>
+                <span class="badge rounded-pill text-bg-primary me-2">{state.movieDetails.formated_runtime}</span>
+                <span each={genre in state.movieDetails.genres}
+                      class="badge rounded-pill text-bg-light me-2">{genre.name}</span>
+                <span class="badge rounded-pill text-bg-danger me-2">{state.movieDetails.original_language_to_upper}</span>
+                <br>
+                <br>
+                <p if={state.movieProducerName}>Réalisé par {state.movieProducerName}</p>
+                <p>Avec <span class="actor-list" each={actor in state.movieCast}><a
+                        href="#/person/{actor.id}">{actor.name}
+                </a></span></p>
+                <p>Date de sortie : {state.movieDetails.formated_release_date}</p>
+
+                <div class="row">
+                    <div each={actor in state.movieCast} class="col-3">
+                        <img if={actor.profile_path} src={actor.profile_path_url} class="img-fluid">
+                    </div>
+                </div>
+                <br>
+                <div>
+                    {state.movieDetails.overview}
+                </div>
+                <br>
+                <ratings voteAverage="{state.movieDetails.vote_average}"></ratings>
+                <div>
+                    {state.movieDetails.vote_count} avis
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .actor-list {
+            display: inline;
+        }
+
+        .actor-list:not(:last-child)::after {
+            content: ", ";
+        }
+    </style>
+
+    <script>
+        export default {
+            onBeforeMount() {
+                this.state = {
+                    movieCredits: {},
+                    movieDetails: {},
+                    movieCast: [],
+                    movieProducerName: null
+                };
+                getMovieDetails(this.props.movieId).then(movieDetails => {
+                    this.update({
+                        movieDetails: movieDetails
+                    });
+                }).catch(err => console.error(err));
+                getCredits("movie", this.props.movieId).then(movieCredits => {
+                    const movieCast = movieCredits.cast.slice(0, 4)
+                    const movieProducer = movieCredits.crew.find(member => member.job === "Producer");
+                    let movieProducerName = null;
+                    if (movieProducer) {
+                        movieProducerName = movieProducer.name || null;
+                    }
+                    this.update({
+                        movieCredits: movieCredits,
+                        movieCast: movieCast,
+                        movieProducerName: movieProducerName
+                    });
+                }).catch(err => console.error(err));
+            },
+
+        }
+    </script>
+</movie-details>

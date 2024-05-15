@@ -1,0 +1,53 @@
+<main>
+    <router base={base}>
+
+        <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#/">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#/movie-lists">Films</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#/tv-lists">Séries</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#/search">Rechercher</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <route path="(#)?">
+            <home-page></home-page>
+        </route>
+        <route path="#/movie/:id">
+            <movie-details movieId="{route.params.id}"></movie-details>
+        </route>
+        <route path="#/person/:id">
+            <person-details personId="{route.params.id}"></person-details>
+        </route>
+        <route path="#/tv/:id">
+            <tv-details tvId="{route.params.id}"></tv-details>
+        </route>
+        <route path="#/movie-lists">
+            <movie-lists></movie-lists>
+        </route>
+        <route path="#/tv-lists">
+            <tv-lists></tv-lists>
+        </route>
+        <route path="#/search">
+            <search-page></search-page>
+        </route>
+    </router>
+
+    <script>
+    export default {
+        base: "https://dwarves.iut-fbleau.fr/~blanchonb/cinema/",
+    }
+    </script>
+</main>

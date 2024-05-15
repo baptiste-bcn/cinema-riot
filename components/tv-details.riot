@@ -1,0 +1,89 @@
+<tv-details>
+    <div style="height:250px">
+        <img src={state.tvDetails.backdrop_url} class="img-fluid">
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-4 bg-light">
+                <img src={state.tvDetails.poster_url} class="img-fluid">
+                <br>
+                <br>
+                <trailer type="tv" id={props.tvId}></trailer>
+            </div>
+            <div class="col-8" style="background-color: white !important;">
+                <h1 class="text-center">{state.tvDetails.name}</h1>
+                <span each={genre in state.tvDetails.genres}
+                      class="badge rounded-pill text-bg-light me-2">{genre.name}</span>
+                <span each={language in state.tvDetails.origin_country} class="badge rounded-pill text-bg-danger me-2">
+                    {language}
+                </span>
+                <br>
+                <br>
+                <p>Crée par <span class="creator-list" each={creator in state.tvDetails.created_by}>
+                        {creator.name}
+                </span></p>
+                <p>Nombre de saisons : {state.tvDetails.number_of_seasons}</p>
+                <p>Nombre d'épisodes : {state.tvDetails.number_of_episodes}</p>
+                <p>Avec <span class="actor-list" each={actor in state.tvCast}><a
+                        href="#/person/{actor.id}">{actor.name}
+                </a></span></p>
+                <p>Date de sortie : {state.tvDetails.formated_first_air_date}</p>
+
+                <div class="row">
+                    <div each={actor in state.tvCast} class="col-3">
+                        <img if={actor.profile_path} src={actor.profile_path_url} class="img-fluid">
+                    </div>
+                </div>
+                <br>
+                <div>
+                    {state.tvDetails.overview}
+                </div>
+                <br>
+                <ratings voteAverage="{state.tvDetails.vote_average}"></ratings>
+                <div>
+                    {state.tvDetails.vote_count} avis
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+        .actor-list {
+            display: inline;
+        }
+
+        .actor-list:not(:last-child)::after {
+            content: ", ";
+        }
+    </style>
+
+    <script>
+        export default {
+            onBeforeMount() {
+                this.state = {
+                    tvCredits: {},
+                    tvDetails: {},
+                    tvCast: [],
+                };
+                getTvDetails(this.props.tvId).then(tvDetails => {
+                    this.update({
+                        tvDetails: tvDetails
+                    });
+                }).catch(err => {
+                    console.error(err);
+                });
+                getCredits("tv", this.props.tvId).then(tvCredits => {
+                    const tvCast = tvCredits.cast.slice(0, 4)
+                    this.update({
+                        tvCredits: tvCredits,
+                        tvCast: tvCast
+                    });
+                }).catch(err => {
+                    console.error(err);
+                });
+
+            }
+        }
+    </script>
+</tv-details>

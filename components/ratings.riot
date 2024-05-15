@@ -1,0 +1,21 @@
+<ratings>
+    <p>
+        Note : {generateRatingStars()} {props.voteAverage}
+    </p>
+
+    <script>
+        export default {
+            generateRatingStars() {
+                let ratingStars = "";
+                const ratingAverage = Math.round(this.props.voteAverage);
+                for (let i = 0; i < ratingAverage; i++) {
+                    ratingStars += "★";
+                }
+                for (let i = 0; i < (10 - ratingAverage); i++) {
+                    ratingStars += "☆";
+                }
+                return ratingStars;
+            }
+        }
+    </script>
+</ratings>
