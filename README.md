@@ -25,4 +25,3 @@ L'application est accessible à l'adresse suivante : https://dwarves.iut-fbleau.
 ---
 
 © Baptiste BLANCHON et Emilien LEDUN
-- [Sujet disponible ici](https://grond.iut-fbleau.fr/monnerat/web_2023/src/branch/master/R4.01_R4.A.10/miniprojet/p1).
